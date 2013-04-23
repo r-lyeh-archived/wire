@@ -338,6 +338,13 @@ namespace wire
             return ( ( map[ this ] = map[ this ] ) = '\0' );
         }
 
+        const char &operator[]( const int &pos ) const {
+            return this->at(pos);
+        }
+        char &operator[]( const int &pos ) {
+            return this->at(pos);
+        }
+
         void pop_back()
         {
             if( this->size() )
