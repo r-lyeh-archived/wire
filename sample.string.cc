@@ -1,4 +1,3 @@
-#include <iostream>
 #include "wire.hpp"
 
 int main( int argc, const char **argv )
@@ -21,8 +20,8 @@ int main( int argc, const char **argv )
     // -> "hello true world"
     wire::string arg3( "hello \1\2\3", '{', "world", (unsigned char)('}') );
     // -> "hello {world}"
-    wire::string arg4( "hello \1 \2 \3 \4 \5 \6 \7", "world", 3.14159f, 3.14159L, false, '\0', arg3, 0 );
-    // -> "hello world 3.14159 3.14159 false \0 hello {world} 0"
+    wire::string arg4( "hello \1 \2 \3 \4 \5 \6 \7", "world", 3.14159f, 3.14159L, false, '\x1', arg3, 0 );
+    // -> "hello world 3.14159 3.14159 false \x1 hello {world} 0"
     }
 
     /* chaining */ {
@@ -50,7 +49,7 @@ int main( int argc, const char **argv )
     hi.at( 3);         // -> 'H'
     hi.at( 4);         // -> 'i'
     hi.at( 5);         // -> '!'
-	// [...]
+    // [...]
     hi.at(-1);         // -> '!'
     hi.at(-2);         // -> 'i'
     hi.at(-3);         // -> 'H'
@@ -59,9 +58,9 @@ int main( int argc, const char **argv )
     hi.at(-6);         // -> 'H'
     // [...]
     hi.at(5) = '?';    // hi = 'Hi?'
-	hi.push_back(404); // hi = "Hi?404"
-	hi.push_back('!'); // hi = "Hi?404!"
-	hi.push_back(hi);  // hi = "Hi?404!Hi?404!"
+    hi.push_back(404); // hi = "Hi?404"
+    hi.push_back('!'); // hi = "Hi?404!"
+    hi.push_back(hi);  // hi = "Hi?404!Hi?404!"
     }
 
     return 0;

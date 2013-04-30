@@ -27,6 +27,8 @@
  * - rlyeh
  */
 
+#include <stdio.h>
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -106,8 +108,10 @@ namespace wire
     {
         wire::string out, id;
 
-        for( auto &it : dollartext )
+        for( wire::string::const_iterator in = dollartext.begin(), end = dollartext.end(); in != end; ++in )
         {
+            const char &it = *in;
+
             if( id.size() )
             {
                 /**/ if( unsigned( it - 'a' ) <= 'z' - 'a' ) id += it;
@@ -148,8 +152,10 @@ namespace wire
         std::string id;
         std::vector< std::string > out;
 
-        for( auto &it : dollartext )
+        for( wire::string::const_iterator in = dollartext.begin(), end = dollartext.end(); in != end; ++in )
         {
+            const char &it = *in;
+
             if( id.size() )
             {
                 /**/ if( unsigned( it - 'a' ) <= 'z' - 'a' ) id += it;

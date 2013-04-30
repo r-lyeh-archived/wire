@@ -38,6 +38,7 @@
 #pragma once
 
 #include <cstdarg>
+#include <cstring>
 
 #include <algorithm>
 #include <cctype>
@@ -58,6 +59,7 @@ namespace wire
     std::string format( const char *fmt, ... );
 
     // Function to save numbers in most precise way
+    namespace {
     template<typename T>
     inline std::string precise( const T &t ) {
         /**/ if( t ==  std::numeric_limits< T >::infinity() ) return  "INF";
@@ -70,13 +72,69 @@ namespace wire
             << std::setprecision( std::numeric_limits< T >::digits10 + 1 )
             << t;
         return ss.str();
-    }
+    } }
 
     // Function to evaluate simple numeric expressions
     double eval( const std::string &expression );
 
     /* Public API */
     // Main class
+
+    namespace
+    {
+        template< typename T >
+        inline T as( const std::string &self ) { const std::string *that = &self;
+            T t;
+            if( !( std::istringstream(*that) >> t ) ) {
+                bool is_true = that->size() && (*that) != "0" && (*that) != "false";
+                t = (T)(is_true);
+            }
+            return t;
+        }
+
+        template<>
+        inline char as( const std::string &self ) { const std::string *that = &self;
+            if( that->size() == 1 )
+                return (char)(that->operator[](0));
+            int t;
+            if( !( std::istringstream(*that) >> t ) ) {
+                bool is_true = that->size() && (*that) != "0" && (*that) != "false";
+                t = (int)(is_true);
+            }
+            return (char)(t);
+        }
+        template<>
+        inline signed char as( const std::string &self ) { const std::string *that = &self;
+            if( that->size() == 1 )
+                return (signed char)(that->operator[](0));
+            int t;
+            if( !( std::istringstream(*that) >> t ) ) {
+                bool is_true = that->size() && (*that) != "0" && (*that) != "false";
+                t = (int)(is_true);
+            }
+            return (signed char)(t);
+        }
+        template<>
+        inline unsigned char as( const std::string &self ) { const std::string *that = &self;
+            if( that->size() == 1 )
+                return (unsigned char)(that->operator[](0));
+            int t;
+            if( !( std::istringstream(*that) >> t ) ) {
+                bool is_true = that->size() && (*that) != "0" && (*that) != "false";
+                t = (int)(is_true);
+            }
+            return (unsigned char)(t);
+        }
+
+        template<>
+        inline const char *as( const std::string &self ) { const std::string *that = &self;
+            return that->c_str();
+        }
+        template<>
+        inline std::string as( const std::string &self ) { const std::string *that = &self;
+            return *that;
+        }
+    }
 
     class string : public std::string
     {
@@ -119,24 +177,21 @@ namespace wire
                 this->assign( ss.str() );
         }
 
-        template<>
-        string( const float &t )
+        string( const float &t ) : std::string()
         {
             std::stringstream ss;
             if( ss << (long double)(t) )
                 this->assign( ss.str() );
         }
 
-        template<>
-        string( const double &t )
+        string( const double &t ) : std::string()
         {
             std::stringstream ss;
             if( ss << (long double)(t) )
                 this->assign( ss.str() );
         }
 
-        template<>
-        string( const long double &t )
+        string( const long double &t ) : std::string()
         {
             std::stringstream ss;
             if( ss << (long double)(t) )
@@ -149,9 +204,11 @@ namespace wire
         template<unsigned N>
         std::string &formatsafe( const std::string &fmt, std::string (&t)[N] )
         {
-            for( const auto &in : fmt )
+            for( std::string::const_iterator it = fmt.begin(), end = fmt.end(); it != end; ++it ) {
+                const char &in = *it;
                 if( unsigned(in) > N ) t[ 0 ] += in;
                 else t[ 0 ] += t[ unsigned(in) ];
+            }
             return t[0];
         }
         public:
@@ -210,50 +267,13 @@ namespace wire
         template< typename T >
         T as() const
         {
-            T t;
-            return std::istringstream(*this) >> t ? t : (T)(as<bool>());
-        }
-
-        template<>
-        bool as() const
-        {
-            return this->size() && (*this) != "0" && (*this) != "false";
-        }
-
-        template<>
-        char as() const
-        {
-            return this->size() == 1 ? (char)(this->at(0)) : (char)(as<int>());
-        }
-
-        template<>
-        signed char as() const
-        {
-            return this->size() == 1 ? (signed char)(this->at(0)) : (signed char)(as<int>());
-        }
-
-        template<>
-        unsigned char as() const
-        {
-            return this->size() == 1 ? (unsigned char)(this->at(0)) : (unsigned char)(as<int>());
-        }
-
-        template<>
-        const char *as() const
-        {
-            return this->c_str();
-        }
-
-        template<>
-        std::string as() const
-        {
-            return *this;
+            return wire::as<T>(*this);
         }
 
         template< typename T >
         operator T() const
         {
-            return as<T>();
+            return wire::as<T>(*this);
         }
 
         // chaining operators
@@ -261,7 +281,8 @@ namespace wire
         template <typename T>
         string &operator <<( const T &t )
         {
-            this->assign( this->str() + string(t) );
+            //*this = *this + string(t);
+            this->append( string(t) );
             return *this;
         }
 
@@ -274,14 +295,11 @@ namespace wire
         string &operator +=( const T &t )
         {
             return operator<<(t);
-            this->assign( this->str() + string(t) );
-            return *this;
         }
 
         string &operator +=( std::ostream &( *pf )(std::ostream &) )
         {
             return operator<<(pf);
-            return *pf == static_cast<std::ostream& ( * )(std::ostream&)>( std::endl ) ? (*this) += "\n", *this : *this;
         }
 
         // assignment sugars
@@ -294,18 +312,17 @@ namespace wire
         }
 
         // comparison sugars
-
+/*
         operator const bool() const
         {
-            return as<bool>();
+            return wire::as<bool>(*this);
         }
-
+*/
         template<typename T>
         bool operator ==( const T &t ) const
         {
-            return t == (*this).as<T>();
+            return wire::as<T>(*this) == t;
         }
-        template<>
         bool operator ==( const wire::string &t ) const
         {
             return this->compare( t ) == 0;
@@ -359,12 +376,14 @@ namespace wire
 
         template<typename T>
         void push_back( const T& t ) {
-            std::swap( *this, *this + string(t) );
+            //std::swap( *this, *this + string(t) );
+            *this = *this + string(t);
         }
 
         template<typename T>
         void push_front( const T& t ) {
-            std::swap( *this, string(t) + *this );
+            //std::swap( *this, string(t) + *this );
+            *this = string(t) + *this;
         }
 
         const char &back() const
@@ -440,13 +459,13 @@ namespace wire
         string left_of( const std::string &substring ) const
         {
             string::size_type pos = this->find( substring );
-            return pos == std::string::npos ? *this : this->substr(0, pos);
+            return pos == std::string::npos ? *this : (string)this->substr(0, pos);
         }
 
         string right_of( const std::string &substring ) const
         {
             std::string::size_type pos = this->find( substring );
-            return pos == std::string::npos ? *this : this->substr(pos + 1);
+            return pos == std::string::npos ? *this : (string)this->substr(pos + 1);
         }
 
         string replace( const std::string &target, const std::string &replacement ) const
@@ -482,7 +501,7 @@ namespace wire
                         match_length = target.size();
 
                     if( this->size() - i >= target.size() )
-                    if( !memcmp( &this->at(i), &target.at(0), match_length ) )
+                    if( !std::memcmp( &this->at(i), &target.at(0), match_length ) )
                     {
                         i += target.size();
 
@@ -586,130 +605,11 @@ namespace wire
             return is_case_sensitive ? ends_with( suffix ) : this->uppercase().ends_with( string(suffix).uppercase() );
         }
 
-        // legacy
-
-        std::deque< string > parse( const std::vector< std::string >& delimiters ) const
-        {
-            struct tokenizer // iago gayoso's tokenizer
-            {
-                size_t index;
-                bool hole, escape;
-                std::string fsm, word;
-
-                tokenizer( const std::string& str = std::string() ) : index(0), hole(false), escape(false), fsm(str)
-                {}
-
-                void init()
-                {
-                    index = 0;
-                    word = "";
-                    escape = hole = false;
-                }
-
-                void transition( const char symbol )
-                {
-                    word += symbol;
-
-                    if( !is_hole() && !is_accepted() )
-                    {
-                        if( fsm[ index ] == '*' )
-                        {
-                            while( index != std::string::npos && fsm[ index ] == '*' )
-                                index++;
-
-                            escape = true;
-                        }
-
-                        if( fsm[ index ] == symbol )
-                        {
-                            index++;
-                            escape = false;
-                        }
-                        else hole = !escape;
-                    }
-                }
-
-                bool is_accepted() const
-                {
-                    struct local
-                    {
-                        static bool match( const char *pattern, const char *str )
-                        {
-                            if( *pattern=='\0' ) return !*str;
-                            if( *pattern=='*' )  return match(pattern+1, str) || *str && match(pattern, str+1);
-                            if( *pattern=='?' )  return *str && (*str != '.') && match(pattern+1, str+1);
-                            return (*str == *pattern) && match(pattern+1, str+1);
-                        }
-                    };
-
-                    return local::match( fsm.c_str(), word.c_str() );
-                }
-
-                bool is_hole() const
-                {
-                    return hole;
-                }
-
-                size_t get_word_size() const
-                {
-                    return word.size();
-                }
-            };
-
-            std::vector< tokenizer > vFSM;
-            std::deque< string > tokens;
-
-            size_t base = 0, index = 0, size = (*this).size();
-
-            for( size_t i = 0; i < delimiters.size(); i++ )
-                vFSM.push_back( tokenizer( delimiters[i] ) );
-
-            while( index < size )
-            {
-                for( size_t i = 0; i < vFSM.size(); i++ )
-                    vFSM[i].transition( (*this).std::string::at(index) );
-
-                index++;
-
-                bool accepted = false;
-                for( size_t i = 0; i < vFSM.size() && !accepted; i++ )
-                    if( vFSM[ i ].is_accepted() )
-                    {
-                        tokens.push_back( (*this).substr( base, (index - vFSM[i].get_word_size()) - base) );
-                        tokens.push_back( (*this).substr( index - vFSM[i].get_word_size(), vFSM[i].get_word_size() ) );
-
-                        for( size_t j = 0; j < vFSM.size(); j++ )
-                            vFSM[j].init();
-
-                        accepted = true;
-                        base = index;
-                    }
-
-                if( !accepted )
-                {
-                    bool blackhole = true;
-                    for( size_t i = 0; i < vFSM.size() && blackhole; i++ )
-                        blackhole &= vFSM[i].is_hole();
-
-                    if( blackhole )
-                    {
-                        for( size_t i = 0; i < vFSM.size(); i++ )
-                            vFSM[i].init();
-                    }
-                }
-            }
-
-            if( base < index )
-                tokens.push_back( (*this).substr( base, index - base) );
-
-            return tokens;
-        }
-
         std::deque< string > tokenize( const std::string &chars ) const
         {
             std::string map( 256, '\0' );
 
-            for( auto it = chars.begin(), end = chars.end(); it != end; ++it )
+            for( std::string::const_iterator it = chars.begin(), end = chars.end(); it != end; ++it )
                 map[ *it ] = '\1';
 
             std::deque< string > tokens;
@@ -929,7 +829,7 @@ namespace wire
     {
         wire::string out;
 
-        for( T::const_iterator it = t.begin(), end = t.end(); it != end; ++it )
+        for( typename T::const_iterator it = t.begin(), end = t.end(); it != end; ++it )
             out << wire::string( format1, *it );
 
         return wire::string() << pre << out << post;
@@ -940,7 +840,7 @@ namespace wire
     {
         wire::string out;
 
-        for( T::const_iterator it = t.begin(), end = t.end(); it != end; ++it )
+        for( typename T::const_iterator it = t.begin(), end = t.end(); it != end; ++it )
             out << wire::string( format1, it->first );
 
         return wire::string() << pre << out << post;
@@ -951,7 +851,7 @@ namespace wire
     {
         wire::string out;
 
-        for( T::const_iterator it = t.begin(), end = t.end(); it != end; ++it )
+        for( typename T::const_iterator it = t.begin(), end = t.end(); it != end; ++it )
             out << wire::string( format1, it->second );
 
         return wire::string() << pre << out << post;
@@ -962,7 +862,7 @@ namespace wire
     {
         wire::string out;
 
-        for( T::const_iterator it = t.begin(), end = t.end(); it != end; ++it )
+        for( typename T::const_iterator it = t.begin(), end = t.end(); it != end; ++it )
             out << wire::string( format12, it->first, it->second );
 
         return wire::string() << pre << out << post;

@@ -33,12 +33,12 @@ wire::eval
 sample
 ------
 Self-descriptive excerpt from provided `sample.string.cc` file.
-<pre>
+```
 /* many constructors */ {
 wire::string helloworld( "hello world" );                   // -> "hello world"
 wire::string h( 'h' );                                      // -> "h"
-wire::string hhh2( wire::string( 3, 'h' ) &lt;&lt; "abc" );       // -> "hhhabc"
-wire::string hhh = wire::string( 'h', 3 ) &lt;&lt; std::endl;     // -> "hhh\n"
+wire::string hhh2( wire::string( 3, 'h' ) << "abc" );       // -> "hhhabc"
+wire::string hhh = wire::string( 'h', 3 ) << std::endl;     // -> "hhh\n"
 wire::string minusone = -1;                                 // -> "-1"
 wire::string zero = 0;                                      // -> "0"
 wire::string boolean = false;                               // -> "false"
@@ -52,13 +52,13 @@ wire::string arg2( "hello \2 \1", "world", true );
 // -> "hello true world"
 wire::string arg3( "hello \1\2\3", '{', "world", (unsigned char)('}') );
 // -> "hello {world}"
-wire::string arg4( "hello \1 \2 \3 \4 \5 \6 \7", "world", 3.14159f, 3.14159L, false, '\0', arg3, 0 );
-// -> "hello world 3.14159 3.14159 false \0 hello {world} 0"
+wire::string arg4( "hello \1 \2 \3 \4 \5 \6 \7", "world", 3.14159f, 3.14159L, false, '\x1', arg3, 0 );
+// -> "hello world 3.14159 3.14159 false \x1 hello {world} 0"
 }
 
 /* chaining */ {
 wire::string chain;
-chain &lt;&lt; "hello world: " &lt;&lt; 3 &lt;&lt; 'a' &lt;&lt; -1 &lt;&lt; std::endl;    // -> "hello world: 3a-1\n"
+chain << "hello world: " << 3 << 'a' << -1 << std::endl;    // -> "hello world: 3a-1\n"
 }
 
 /* implicit type conversion */ {
@@ -94,4 +94,4 @@ hi.push_back(404); // hi = "Hi?404"
 hi.push_back('!'); // hi = "Hi?404!"
 hi.push_back(hi);  // hi = "Hi?404!Hi?404!"
 }
-</pre>
+```
