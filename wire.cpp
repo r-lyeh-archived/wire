@@ -46,6 +46,8 @@ namespace wire
 {
 #   ifdef _MSC_VER
 #       define wire$vsnprintf _vsnprintf
+#       pragma warning( push )
+#       pragma warning( disable : 4996 )
 #   else
 #       define wire$vsnprintf  vsnprintf
 #   endif
@@ -87,6 +89,9 @@ namespace wire
         return self;
     }
 
+#   ifdef _MSC_VER
+#       pragma warning( pop )
+#   endif
 #   undef wire$vsnprintf
 }
 
