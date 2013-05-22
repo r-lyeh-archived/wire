@@ -660,7 +660,8 @@ namespace wire
                 }
             }
 
-            tokens.push_back( str );
+            if( !str.empty() )
+                tokens.push_back( str );
             return tokens;
         }
     };
