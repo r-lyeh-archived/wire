@@ -33,7 +33,7 @@ wire::eval
 sample
 ------
 Self-descriptive excerpt from provided `sample.string.cc` file.
-```
+```c++
 /* many constructors */ {
 wire::string helloworld( "hello world" );                   // -> "hello world"
 wire::string h( 'h' );                                      // -> "h"

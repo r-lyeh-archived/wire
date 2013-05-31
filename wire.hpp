@@ -83,56 +83,34 @@ namespace wire
     namespace
     {
         template< typename T >
-        inline T as( const std::string &self ) { const std::string *that = &self;
+        inline T as( const std::string &self ) {
             T t;
-            if( !( std::istringstream(*that) >> t ) ) {
-                bool is_true = that->size() && (*that) != "0" && (*that) != "false";
-                t = (T)(is_true);
-            }
-            return t;
+            if( std::istringstream(self) >> t )
+                return t;
+            bool is_true = self.size() && (self != "0") && (self != "false");
+            return (T)(is_true);
         }
 
         template<>
-        inline char as( const std::string &self ) { const std::string *that = &self;
-            if( that->size() == 1 )
-                return (char)(that->operator[](0));
-            int t;
-            if( !( std::istringstream(*that) >> t ) ) {
-                bool is_true = that->size() && (*that) != "0" && (*that) != "false";
-                t = (int)(is_true);
-            }
-            return (char)(t);
+        inline char as( const std::string &self ) {
+            return self.size() == 1 ? (char)(self[0]) : (char)(as<int>(self));
         }
         template<>
-        inline signed char as( const std::string &self ) { const std::string *that = &self;
-            if( that->size() == 1 )
-                return (signed char)(that->operator[](0));
-            int t;
-            if( !( std::istringstream(*that) >> t ) ) {
-                bool is_true = that->size() && (*that) != "0" && (*that) != "false";
-                t = (int)(is_true);
-            }
-            return (signed char)(t);
+        inline signed char as( const std::string &self ) {
+            return self.size() == 1 ? (signed char)(self[0]) : (signed char)(as<int>(self));
         }
         template<>
-        inline unsigned char as( const std::string &self ) { const std::string *that = &self;
-            if( that->size() == 1 )
-                return (unsigned char)(that->operator[](0));
-            int t;
-            if( !( std::istringstream(*that) >> t ) ) {
-                bool is_true = that->size() && (*that) != "0" && (*that) != "false";
-                t = (int)(is_true);
-            }
-            return (unsigned char)(t);
+        inline unsigned char as( const std::string &self ) {
+            return self.size() == 1 ? (unsigned char)(self[0]) : (unsigned char)(as<int>(self));
         }
 
         template<>
-        inline const char *as( const std::string &self ) { const std::string *that = &self;
-            return that->c_str();
+        inline const char *as( const std::string &self ) {
+            return self.c_str();
         }
         template<>
-        inline std::string as( const std::string &self ) { const std::string *that = &self;
-            return *that;
+        inline std::string as( const std::string &self ) {
+            return self;
         }
     }
 
