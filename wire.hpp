@@ -240,6 +240,45 @@ namespace wire
             assign( formatsafe( fmt, t ) );
         }
 
+        wire::string &operator()() {
+            return *this;
+        }
+
+        template< typename T1 >
+        wire::string &operator()( const T1 &t1 ) {
+            return assign( string( *this, t1 ) ), *this;
+        }
+
+        template< typename T1, typename T2 >
+        wire::string &operator()( const T1 &t1, const T2 &t2 ) {
+            return assign( string( *this, t1, t2 ) ), *this;
+        }
+
+        template< typename T1, typename T2, typename T3 >
+        wire::string &operator()( const T1 &t1, const T2 &t2, const T3 &t3 ) {
+            return assign( string( *this, t1, t2, t3 ) ), *this;
+        }
+
+        template< typename T1, typename T2, typename T3, typename T4 >
+        wire::string &operator()( const T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4 ) {
+            return assign( string( *this, t1, t2, t3, t4 ) ), *this;
+        }
+
+        template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+        wire::string &operator()( const T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5 ) {
+            return assign( string( *this, t1, t2, t3, t4, t5 ) ), *this;
+        }
+
+        template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6 >
+        wire::string &operator()( const T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5, const T6 &t6 ) {
+            return assign( string( *this, t1, t2, t3, t4, t5, t6 ) ), *this;
+        }
+
+        template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7 >
+        wire::string &operator()( const T1 &t1, const T2 &t2, const T3 &t3, const T4 &t4, const T5 &t5, const T6 &t6, const T7 &t7 ) {
+            return assign( string( *this, t1, t2, t3, t4, t5, t6, t7 ) ), *this;
+        }
+
         // conversion
 
         template< typename T >
@@ -847,3 +886,27 @@ namespace wire
         return wire::string() << pre << out << post;
     }
 }
+
+// $wire(), introspective macro
+
+namespace wire
+{
+    // @todo: eq+sep+line is a c++11 constexpr
+    struct parser : public wire::string {
+        parser( const wire::string &fmt, const wire::string &line = std::string() ) {
+            wire::strings all = line.tokenize(", \r\n\t");
+            wire::strings::iterator it, begin, end;
+
+            typedef std::pair<std::string,std::string> pair;
+            std::vector< pair > results;
+
+            for( it = begin = all.begin(), end = all.end(); it != end; ++it ) {
+                results.push_back( pair( (*it).right_of(".").right_of("->"), std::string() + char(it - begin + '\1') ) );
+            }
+
+            assign( str12(results, fmt) );
+        }
+    };
+}
+
+#define $wire(FMT,...) wire::parser(FMT,#__VA_ARGS__)(__VA_ARGS__)

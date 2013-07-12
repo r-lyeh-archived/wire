@@ -30,6 +30,18 @@ wire::eval
 ----------
 @todocument
 
+$wire
+-----
+@todocument
+
+$()
+---
+@todocument
+
+$$()
+----
+@todocument
+
 sample
 ------
 Self-descriptive excerpt from provided `sample.string.cc` file.
@@ -93,5 +105,12 @@ hi.at(5) = '?';    // hi = 'Hi?'
 hi.push_back(404); // hi = "Hi?404"
 hi.push_back('!'); // hi = "Hi?404!"
 hi.push_back(hi);  // hi = "Hi?404!Hi?404!"
+}
+
+/* quick introspection echo macro */ {
+int health = 100;
+float money = 123.25;
+const char *hello = "world!";
+std::string echo = $wire(health,money,hello); // -> "health=100\nmoney=123.25\nhello=world!\n"
 }
 ```

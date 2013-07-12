@@ -63,5 +63,12 @@ int main( int argc, const char **argv )
     hi.push_back(hi);  // hi = "Hi?404!Hi?404!"
     }
 
+    /* quick introspection echo macro */ {
+    int health = 100;
+    float money = 123.25;
+    const char *hello = "world!";
+    std::string echo = $wire("\1=\2,", health,money,hello); // -> "health=100,money=123.25,hello=world!,"
+    }
+
     return 0;
 }

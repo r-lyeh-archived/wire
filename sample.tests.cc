@@ -7,17 +7,18 @@
 
 std::stringstream right, wrong;
 
-#define test1(A) do { auto _A_ = (A); if( _A_ != decltype(A)(0) ) \
-    right << "[ OK ] " #A " -> " << _A_ << std::endl; else \
-    wrong << "[FAIL] " #A " -> " << _A_ << std::endl; \
-} while(0)
+#define test1(A) [&]() { auto _A_ = (A); if( _A_ != decltype(A)(0) ) \
+    return right << "[ OK ] " __FILE__ ":" << __LINE__ << " -> " #A " -> " << _A_ << std::endl, true; else \
+    return wrong << "[FAIL] " __FILE__ ":" << __LINE__ << " -> " #A " -> " << _A_ << std::endl, false; \
+}()
 
-#define test3(A,op,B) do { auto _A_ = (A); auto _B_ = (B); if( _A_ op _B_ ) \
-    right << "[ OK ] " #A " " #op " " #B " -> " << _A_ << " " #op " " << _B_ << std::endl; else \
-    wrong << "[FAIL] " #A " " #op " " #B " -> " << _A_ << " " #op " " << _B_ << std::endl; \
-} while(0)
+#define test3(A,op,B) [&]() { auto _A_ = (A); auto _B_ = (B); if( _A_ op _B_ ) \
+    return right << "[ OK ] " __FILE__ ":" << __LINE__ << " -> " #A " " #op " " #B " -> " << _A_ << " " #op " " << _B_ << std::endl, true; else \
+    return wrong << "[FAIL] " __FILE__ ":" << __LINE__ << " -> " #A " " #op " " #B " -> " << _A_ << " " #op " " << _B_ << std::endl, false; \
+}()
 
-#define testNaN(NaN) test3(NaN,!=,NaN)
+#define testNaN(NaN)    test3(NaN,!=,NaN)
+#define testClose(A,B)  test1( B-A < 1e-6 ? true : B-A < -1e-6 ? true : false )
 
 struct ctest_stream1
 {
@@ -128,6 +129,17 @@ void tests_from_string_sample()
     hi.push_back(hi);  // hi = "Hi?404!Hi?404!"
 
     test3( hi ,==, "Hi?404!Hi?404!" );
+    }
+
+    /* quick introspection echo macro */ {
+    int health = 100;
+    float money = 123.25;
+    const char *hello = "world!";
+
+    std::string echo = $wire("\1=\2;", health,money,hello);
+    test3( echo, ==, "health=100;money=123.25;hello=world!;" );
+
+    test3( std::string(), ==, $wire("") );
     }
 }
 
@@ -416,10 +428,14 @@ int main( int argc, const char **argv )
 
     // End of tests. Show results.
     std::cout << right.str();
+    std::cout << std::endl;
     std::cout << wrong.str();
+    std::cout << std::endl;
 
     if( wrong.str().empty() )
-        std::cout << "All ok." << std::endl;
+        std::cout << "All ok :)" << std::endl;
+    else
+        std::cout << "Test(s) failed! :(" << std::endl;
 
     return 0;
 }
