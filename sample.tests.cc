@@ -139,7 +139,7 @@ void tests_from_string_sample()
     std::string echo = $wire("\1=\2;", health,money,hello);
     test3( echo, ==, "health=100;money=123.25;hello=world!;" );
 
-    test3( std::string(), ==, $wire("") );
+    test3( std::string(), ==, $wire("", 0) );
     }
 }
 

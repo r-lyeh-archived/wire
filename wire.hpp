@@ -138,6 +138,9 @@ namespace wire
         string( const char *cstr ) : std::string( cstr ? cstr : "" )
         {}
 
+        string( char * const &cstr ) : std::string( cstr ? cstr : "" )
+        {}
+
         template<size_t N>
         string( const char (&cstr)[N] ) : std::string( cstr )
         {}

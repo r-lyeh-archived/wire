@@ -46,7 +46,7 @@ int main( int argc, const char **argv )
 
     // 6) All these symbols work internally as strings. You can cast them by using these additional macros.
 
-    assert( $bool(flag) ^ true == false );
+    assert( $bool(flag) && true );
     assert( $char(letter) == 'a' );
     assert( $int(items) * 2 == 200 );
     assert( $string(name) + $string(name) == "John DoeJohn Doe" );
