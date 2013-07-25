@@ -625,64 +625,30 @@ namespace wire
             return is_case_sensitive ? ends_with( suffix ) : this->uppercase().ends_with( string(suffix).uppercase() );
         }
 
-        std::deque< string > tokenize( const std::string &chars ) const
-        {
+        std::deque< string > tokenize( const std::string &delimiters ) const {
             std::string map( 256, '\0' );
-
-            for( std::string::const_iterator it = chars.begin(), end = chars.end(); it != end; ++it )
-                map[ *it ] = '\1';
-
-            std::deque< string > tokens;
-
-            tokens.push_back( string() );
-
-            for( int i = 0, end = this->size(); i < end; ++i )
-            {
-                unsigned char c = at(i);
-
-                std::string &str = tokens.back();
-
-                if( !map.at(c) )
-                    str.push_back( c );
-                else
-                if( str.size() )
-                    tokens.push_back( string() );
+            for( auto &ch : delimiters )
+                map[ ch ] = '\1';
+            std::deque< string > tokens(1);
+            for( auto &ch : *this ) {
+                /**/ if( !map.at(ch)          ) tokens.back().push_back( ch );
+                else if( tokens.back().size() ) tokens.push_back( string() );
             }
-
-            while( tokens.size() && !tokens.back().size() )
-                tokens.pop_back();
-
+            while( tokens.size() && !tokens.back().size() ) tokens.pop_back();
             return tokens;
         }
 
         // tokenize_incl_separators
-        std::deque< string > split( const std::string& delimiters ) const
-        {
-            std::deque< string > tokens;
+        std::deque< string > split( const std::string &delimiters ) const {
             std::string str;
-
-            for( size_t i = 0; i < this->size(); ++i )
-            {
-                char c = this->operator[](i);
-
-                if( delimiters.find_first_of( c ) == std::string::npos )
-                {
-                    str += c;
-                }
-                else
-                {
-                    if( str.size() )
-                        tokens.push_back( str );
-
-                    tokens.push_back( c );
-
-                    str = "";
-                }
+            std::deque< string > tokens;
+            for( auto &ch : *this ) {
+                if( delimiters.find_first_of( ch ) != std::string::npos ) {
+                    if( str.size() ) tokens.push_back( str ), str = "";
+                    tokens.push_back( std::string() + ch );
+                } else str += ch;
             }
-
-            if( !str.empty() )
-                tokens.push_back( str );
-            return tokens;
+            return str.empty() ? tokens : ( tokens.push_back( str ), tokens );
         }
     };
 
