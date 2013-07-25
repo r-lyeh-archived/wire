@@ -361,7 +361,7 @@ namespace wire
         {
             signed size = (signed)(this->size());
             if( size )
-                return this->data()[ pos >= 0 ? pos % size : size - 1 + ((pos+1) % size) ];
+                return this->std::string::at( pos >= 0 ? pos % size : size - 1 + ((pos+1) % size) );
             static std::map< const string *, char > map;
             return ( ( map[ this ] = map[ this ] ) = '\0' );
         }
@@ -370,7 +370,7 @@ namespace wire
         {
             signed size = (signed)(this->size());
             if( size )
-                return const_cast<char &>( this->data()[ pos >= 0 ? pos % size : size - 1 + ((pos+1) % size) ] );
+                return this->std::string::at( pos >= 0 ? pos % size : size - 1 + ((pos+1) % size) );
             static std::map< const string *, char > map;
             return ( ( map[ this ] = map[ this ] ) = '\0' );
         }
