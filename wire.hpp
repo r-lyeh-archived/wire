@@ -433,20 +433,6 @@ namespace wire
             return pre + *this + post;
         }
 
-        bool matches( const std::string &pattern ) const
-        {
-            struct local {
-                static bool match( const char *pattern, const char *str ) {
-                    if( *pattern=='\0' ) return !*str;
-                    if( *pattern=='*' )  return match(pattern+1, str) || *str && match(pattern, str+1);
-                    if( *pattern=='?' )  return *str && (*str != '.') && match(pattern+1, str+1);
-                    return (*str == *pattern) && match(pattern+1, str+1);
-                }
-            };
-
-            return local::match( pattern.c_str(), (*this).c_str() );
-        }
-
         string uppercase() const
         {
             std::string s = *this;
@@ -463,6 +449,25 @@ namespace wire
             std::transform( s.begin(), s.end(), s.begin(), (int(*)(int)) std::tolower );
 
             return s;
+        }
+
+        bool matches( const std::string &pattern ) const
+        {
+            struct local {
+                static bool match( const char *pattern, const char *str ) {
+                    if( *pattern=='\0' ) return !*str;
+                    if( *pattern=='*' )  return match(pattern+1, str) || *str && match(pattern, str+1);
+                    if( *pattern=='?' )  return *str && (*str != '.') && match(pattern+1, str+1);
+                    return (*str == *pattern) && match(pattern+1, str+1);
+                }
+            };
+
+            return local::match( pattern.c_str(), (*this).c_str() );
+        }
+
+        bool matchesi( const std::string &pattern ) const
+        {
+            return this->uppercase().matches( string(pattern).uppercase() );
         }
 
         size_t count( const std::string &substr ) const
@@ -610,9 +615,9 @@ namespace wire
             return this->size() >= prefix.size() ? this->substr( 0, prefix.size() ) == prefix : false;
         }
 
-        bool starts_with( const std::string &prefix, bool is_case_sensitive ) const
+        bool starts_withi( const std::string &prefix ) const
         {
-            return is_case_sensitive ? starts_with( prefix ) : this->uppercase().starts_with( string(prefix).uppercase() );
+            return this->uppercase().starts_with( string(prefix).uppercase() );
         }
 
         bool ends_with( const std::string &suffix ) const
@@ -620,9 +625,9 @@ namespace wire
             return this->size() < suffix.size() ? false : this->substr( this->size() - suffix.size() ) == suffix;
         }
 
-        bool ends_with( const std::string &suffix, bool is_case_sensitive ) const
+        bool ends_withi( const std::string &suffix ) const
         {
-            return is_case_sensitive ? ends_with( suffix ) : this->uppercase().ends_with( string(suffix).uppercase() );
+            return this->uppercase().ends_with( string(suffix).uppercase() );
         }
 
         std::deque< string > tokenize( const std::string &delimiters ) const {

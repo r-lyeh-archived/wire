@@ -1,7 +1,7 @@
 // simple getopt replacement class. mit licensed
 // - rlyeh
 
-// this class is a classic std::map replacement where key/value are wire::string's:
+// this geptop class is a std::map replacement where key/value are wire::string.
 // given invokation './app.out --user=me --pass=123 -h' this class delivers:
 // map[0] = "./app.out", map[1] = "--user=me", map[2]="--pass=boo", map[3]='-h'
 // but also, map["user"]="me", map["pass"]="123" and also, map["h"]=true
@@ -82,8 +82,8 @@ struct getopt : public std::map< wire::string, wire::string >
 int main( int argc, const char **argv ) {
     getopt args( argc, argv );
 
-    if( !args.has(1) || args.has("h") || args.has("help") || args.has("?") ) {
-        std::cout << args[0] << " [-v|--version] [-?|-h|--help] [--depth=number]" << std::endl;
+    if( args.has("h") || args.has("help") || args.has("?") || args.size() == 1 ) {
+        std::cout << args[0] << " [-?|-h|--help] [-v|--version] [--depth=number]" << std::endl;
         return -1;
     }
 
@@ -92,7 +92,7 @@ int main( int argc, const char **argv ) {
     }
 
     if( args.has("depth") ) {
-        int depth = args["depth"].as<int>();
+        int depth = args["depth"];
         std::cout << "depth set to " << depth << std::endl;
     }
 
