@@ -17,8 +17,7 @@ std::stringstream right, wrong;
     return wrong << "[FAIL] " __FILE__ ":" << __LINE__ << " -> " #A " " #op " " #B " -> " << _A_ << " " #op " " << _B_ << std::endl, false; \
 }()
 
-#define testNaN(NaN)    test3(NaN,!=,NaN)
-#define testClose(A,B)  test1( B-A < 1e-6 ? true : B-A < -1e-6 ? true : false )
+#define testN(NaN)    test3(NaN,!=,NaN)
 
 struct ctest_stream1
 {
@@ -150,12 +149,9 @@ int main( int argc, const char **argv )
     test3( wire::eval("(2+3)*2"), ==, 10 );
 
     test3( wire::string(99.95f), ==, "99.95" );
-    test3( wire::string(999.9999f), ==, "999.9999" );
-    test3( wire::precise(999.9999f), ==, "999.9999" );
-
-    test3( wire::string(3.1415926535897932384626433832795L), ==, std::string("3.1415926535897932384626433832795").substr( 0, std::numeric_limits<long double>::digits10 + 1 + 1 ) );
-
-    test3( wire::string(3.1415926535897932384626433832795L), ==, std::string("3.1415926535897932384626433832795").substr( 0, std::numeric_limits<long double>::digits10 + 1 + 1 ) );
+    test3( wire::string(999.9999), ==, 999.9999 );
+    test3( wire::precise(999.9999f), ==, "0x1.f3fffcp+9" );
+    test3( wire::precise("0x1.f3fffcp+9"), ==, 999.9999 );
 
     test3( wire::string().strip(), ==, wire::string() );
     test3( wire::string("").strip(), ==, wire::string() );
@@ -393,35 +389,35 @@ int main( int argc, const char **argv )
     test3( wire::eval("2-+-2"), ==, 4 );
 
     // Check for parenthesis error
-    testNaN( wire::eval("5*((1+3)*2+1") );
-    testNaN( wire::eval("5*((1+3)*2)+1)") );
+    testN( wire::eval("5*((1+3)*2+1") );
+    testN( wire::eval("5*((1+3)*2)+1)") );
 
     // Check for repeated operators
-    testNaN( wire::eval("5*/2") );
+    testN( wire::eval("5*/2") );
 
     // Check for wrong positions of an operator
-    testNaN( wire::eval("*2") );
-    testNaN( wire::eval("2+") );
-    testNaN( wire::eval("2*") );
+    testN( wire::eval("*2") );
+    testN( wire::eval("2+") );
+    testN( wire::eval("2*") );
 
     // Check for divisions by zero
-    testNaN( wire::eval("2/0") );
-    testNaN( wire::eval("3+1/(5-5)+4") );
-    testNaN( wire::eval("2/") ); // Erroneously detected as division by zero, but that's ok for us
+    testN( wire::eval("2/0") );
+    testN( wire::eval("3+1/(5-5)+4") );
+    testN( wire::eval("2/") ); // Erroneously detected as division by zero, but that's ok for us
 
     // Check for invalid characters
-    testNaN( wire::eval("~5") );
-    testNaN( wire::eval("5x") );
+    testN( wire::eval("~5") );
+    testN( wire::eval("5x") );
 
     // Check for multiply errors
-    testNaN( wire::eval("3+1/0+4$") ); // Only one error will be detected (in this case, the last one)
-    testNaN( wire::eval("3+1/0+4") );
-    testNaN( wire::eval("q+1/0)") ); // ...or the first one
-    testNaN( wire::eval("+1/0)") );
-    testNaN( wire::eval("+1/0") );
+    testN( wire::eval("3+1/0+4$") ); // Only one error will be detected (in this case, the last one)
+    testN( wire::eval("3+1/0+4") );
+    testN( wire::eval("q+1/0)") ); // ...or the first one
+    testN( wire::eval("+1/0)") );
+    testN( wire::eval("+1/0") );
 
     // Check for emtpy string
-    testNaN( wire::eval("") );
+    testN( wire::eval("") );
 
     // Other tests
     tests_from_string_sample();

@@ -58,21 +58,22 @@ namespace wire
     // Function to do safe C-style formatting
     std::string format( const char *fmt, ... );
 
-    // Function to save numbers in most precise way
-    namespace {
-    template<typename T>
-    inline std::string precise( const T &t ) {
-        /**/ if( t ==  std::numeric_limits< T >::infinity() ) return  "INF";
-        else if( t == -std::numeric_limits< T >::infinity() ) return "-INF";
+    // Function to convert strings <-> numbers in most precise way (C99)
+    static inline std::string precise( const long double &t ) {
+        /**/ if( t ==  std::numeric_limits< long double >::infinity() ) return  "INF";
+        else if( t == -std::numeric_limits< long double >::infinity() ) return "-INF";
         else if( t != t ) return "NaN";
-        // C++11 way to do <<std::fixed<<std::scientific: <<std::hexfloat
-        std::stringstream ss;
-        ss  << std::fixed
-          /*<< std::scientific*/
-            << std::setprecision( std::numeric_limits< T >::digits10 + 1 )
-            << t;
-        return ss.str();
-    } }
+        // C99 way {
+        char buf[ 32 ];
+        sprintf(buf, "%a", t);
+        return buf;
+        // }
+    }
+    static inline long double precise( const std::string &t ) {
+        long double ld;
+        sscanf(t.c_str(), "%la", &ld);
+        return ld;
+    }
 
     // Function to evaluate simple numeric expressions
     double eval( const std::string &expression );
@@ -160,20 +161,17 @@ namespace wire
 
         string( const float &t ) : std::string()
         {
-            std::stringstream ss;
-            if( ss << (long double)(t) )
-                this->assign( ss.str() );
+            *this = string( (long double)t );
         }
 
         string( const double &t ) : std::string()
         {
-            std::stringstream ss;
-            if( ss << (long double)(t) )
-                this->assign( ss.str() );
+            *this = string( (long double)t );
         }
 
         string( const long double &t ) : std::string()
         {
+            // enum { max_digits = std::numeric_limits<long double>::digits10 + 2 };
             std::stringstream ss;
             if( ss << (long double)(t) )
                 this->assign( ss.str() );
@@ -341,7 +339,7 @@ namespace wire
         template<typename T>
         bool operator ==( const T &t ) const
         {
-            return wire::as<T>(*this) == t;
+            return wire::as<T>(*this) == wire::string(t).as<T>();
         }
         bool operator ==( const wire::string &t ) const
         {
@@ -764,7 +762,7 @@ namespace wire
         std::string str( const char *format1 = "\1\n", const std::string &pre = std::string(), const std::string &post = std::string() ) const
         {
             if( this->size() == 1 )
-                return *this->begin();
+                return pre + *this->begin() + post;
 
             std::string out( pre );
 
@@ -772,6 +770,11 @@ namespace wire
                 out += string( format1, (*it) );
 
             return out + post;
+        }
+
+        template<typename ostream>
+        inline friend ostream &operator <<( ostream &os, const wire::strings &self ) {
+            return os << self.str(), s;
         }
     };
 }

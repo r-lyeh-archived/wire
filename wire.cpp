@@ -36,12 +36,6 @@
 
 #include "wire.hpp"
 
-std::ostream &operator <<( std::ostream &os, const wire::strings &s )
-{
-    os << s.str();
-    return os;
-}
-
 namespace wire
 {
 #   ifdef _MSC_VER
