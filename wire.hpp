@@ -774,7 +774,7 @@ namespace wire
 
         template<typename ostream>
         inline friend ostream &operator <<( ostream &os, const wire::strings &self ) {
-            return os << self.str(), s;
+            return os << self.str(), self;
         }
     };
 }
