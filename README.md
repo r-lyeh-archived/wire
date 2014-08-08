@@ -9,9 +9,7 @@ Wire
 - No dependencies.
 - MIT licensed.
 
-wire::string
-------------
-
+### wire::string()
 Extended ```std::string``` replacement.
 
 ```c++
@@ -106,9 +104,7 @@ a_b_c_d_e.split("_") == vector<string>({"a","_","b","_","c","_","d","_","e"});
 string("\1\2\3")("hello", "world", 12) == "helloworld12";
 ```
 
-wire::strings
--------------
-
+### wire::strings()
 Extended ```deque<wire::string>``` replacement
 
 @todocument
@@ -137,9 +133,60 @@ operator std::vector<std::string>() const
 std::string str( fmt1 = "\1\n", pre = string(), post = std::string() ) const
 ```
 
-wire::dollar
-------------
+### wire::format()
+Safe C format
 
+```c++
+std::string fmt = wire::format("hello %s %3d\n", "world", 123);
+// fmt == "hello world 123\n"
+```
+
+### wire::eval()
+
+Simple expression evaluator
+
+```c++
+double a = wire::eval("(12*12)+6");
+// a == 150.0
+double b = wire::eval("1/0");
+double c = wire::eval("1+x");
+double d = wire::eval("1+2)");
+// b == NaN && c == NaN && d == NaN
+```
+
+### $wire()
+Quick introspection echo macro
+
+```c++
+int health = 100;
+float money = 123.25;
+const char *hello = "world!";
+std::string echo = $wire("\1=\2,", health,money,hello);
+// echo == "health=100,money=123.25,hello=world!,"
+```
+
+### wire::str()
+Generic formatters
+
+@todocument
+```
+std::string wire::str( const T&, fmt1, pre = string(), post = string() )
+std::string wire::str1( const T&, fmt1, pre = string(), post = string() )
+std::string wire::str2( const T&, fmt1, pre = string(), post = string() )
+std::string wire::str12( const T&, fmt12, pre = string(), post = string() )
+```
+
+### wire::ini()
+INI reader
+
+@todocument
+
+### wire::getopt()
+Arguments parser
+
+@todocument
+
+### wire::dollars
 String interpolation macros
 
 - Use `$(symbol)` macro to create/update a symbol
@@ -169,52 +216,3 @@ See also macro sugars:
 
 Check [sample.dollar.cc](sample.dollar.cc) for a detailed sample usage.
 
-wire::format
-------------
-
-Safe C format
-
-```c++
-std::string fmt = wire::format("hello %s %3d\n", "world", 123);
-// fmt == "hello world 123\n"
-```
-
-wire::eval
-----------
-
-Simple expression evaluator
-
-```c++
-double a = wire::eval("(12*12)+6");
-// a == 150.0
-double b = wire::eval("1/0");
-double c = wire::eval("1+x");
-double d = wire::eval("1+2)");
-// b == NaN && c == NaN && d == NaN
-```
-
-$wire()
--------
-
-Quick introspection echo macro
-
-```c++
-int health = 100;
-float money = 123.25;
-const char *hello = "world!";
-std::string echo = $wire("\1=\2,", health,money,hello);
-// echo == "health=100,money=123.25,hello=world!,"
-```
-
-wire::str()
------------
-
-Generic formatters
-
-@todocument
-```
-std::string wire::str( const T&, fmt1, pre = string(), post = string() )
-std::string wire::str1( const T&, fmt1, pre = string(), post = string() )
-std::string wire::str2( const T&, fmt1, pre = string(), post = string() )
-std::string wire::str12( const T&, fmt12, pre = string(), post = string() )
-```
