@@ -18,6 +18,6 @@ int main( int argc, const char **argv ) {
         std::cout << "depth set to " << depth << std::endl;
     }
 
-    std::cout << "Provided args: " << args.str() << std::endl;
+    std::cout << args.size() << " provided args: " << args.str() << std::endl;
     return 0;
 }

@@ -183,10 +183,9 @@ namespace wire
         template<unsigned N>
         std::string &formatsafe( const std::string &fmt, std::string (&t)[N] )
         {
-            for( std::string::const_iterator it = fmt.begin(), end = fmt.end(); it != end; ++it ) {
-                const char &in = *it;
-                if( unsigned(in) > N ) t[ 0 ] += in;
-                else t[ 0 ] += t[ unsigned(in) ];
+            for( const unsigned char &ch : fmt ) {
+                if( ch > N ) t[0] += char(ch);
+                else t[0] += t[ ch ];
             }
             return t[0];
         }
@@ -491,6 +490,12 @@ namespace wire
             return pos == std::string::npos ? *this : (string)this->substr(pos + 1);
         }
 
+        string replace1( const std::string &target, const std::string &replacement ) const {
+            std::string str = *this;
+            auto found = str.find(target);
+            return found == string::npos ? str : (str.replace(found, target.length(), replacement), str);
+        }
+
         string replace( const std::string &target, const std::string &replacement ) const
         {
             size_t found = 0;
@@ -630,11 +635,11 @@ namespace wire
 
         std::deque< string > tokenize( const std::string &delimiters ) const {
             std::string map( 256, '\0' );
-            for( auto &ch : delimiters )
+            for( const unsigned char &ch : delimiters )
                 map[ ch ] = '\1';
             std::deque< string > tokens(1);
-            for( auto &ch : *this ) {
-                /**/ if( !map.at(ch)          ) tokens.back().push_back( ch );
+            for( const unsigned char &ch : *this ) {
+                /**/ if( !map.at(ch)          ) tokens.back().push_back( char(ch) );
                 else if( tokens.back().size() ) tokens.push_back( string() );
             }
             while( tokens.size() && !tokens.back().size() ) tokens.pop_back();
@@ -898,6 +903,7 @@ namespace wire
 
 // .cmdline() for a print app invokation string
 // .str() for pretty map printing
+// .size() number of arguments (equivalent to argc), rather than std::map.size()
 
 namespace wire {
 
@@ -930,6 +936,13 @@ namespace wire {
             }
         }
 
+        size_t size() const {
+            unsigned i;
+            for( i = 0; has(i); ++i ) 
+            {}
+            return i;
+        }
+
         bool has( const wire::string &op ) const {
             return this->find(op) != this->end();
         }
@@ -945,9 +958,8 @@ namespace wire {
             wire::string cmd;
 
             // concatenate args
-            for( unsigned i = 0; has(i); ++i ) {
-                const auto it = this->find(i);
-                cmd << it->second << ' ';
+            for( unsigned arg = 0, end = size(); arg < end; ++arg ) {
+                cmd << this->find(arg)->second << ' ';
             }
 
             // remove trailing space, if needed
