@@ -664,72 +664,52 @@ namespace wire
     {
         public:
 
-        strings()
+        strings() : std::deque< string >()
         {}
 
-        template <typename contained>
-        strings( const std::deque<contained> &c )
-        {
-            operator=( c );
-        }
-
-        template <typename contained>
-        strings &operator =( const std::deque<contained> &c )
-        {
-            this->resize( c.size() );
-
-            std::copy( c.begin(), c.end(), this->begin() );
-
-            return *this;
-        }
-
-        template <typename contained>
-        strings( const std::vector<contained> &c )
-        {
-            operator=( c );
-        }
-
-        template <typename contained>
-        strings &operator =( const std::vector<contained> &c )
-        {
-            this->resize( c.size() );
-
-            std::copy( c.begin(), c.end(), this->begin() );
-
-            return *this;
-        }
-
-        strings( const int &argc, const char **&argv )
+        strings( const int &argc, const char **&argv ) : std::deque< string >()
         {
             for( int i = 0; i < argc; ++i )
                 this->push_back( argv[i] );
         }
 
-        strings( const int &argc, char **&argv )
+        strings( const int &argc, char **&argv ) : std::deque< string >()
         {
             for( int i = 0; i < argc; ++i )
                 this->push_back( argv[i] );
         }
 
         template< typename T, const size_t N >
-        strings( const T (&args)[N] )
+        strings( const T (&args)[N] ) : std::deque< string >()
         {
             this->resize( N );
             for( int n = 0; n < N; ++n )
                 (*this)[ n ] = args[ n ];
         }
 
-        template< typename T > strings( const T &t0, const T &t1 )
+        template <typename CONTAINER>
+        strings( const CONTAINER &other ) : std::deque< string >( other.begin(), other.end() )
+        {}
+
+        template <typename CONTAINER>
+        strings &operator =( const CONTAINER &other ) : std::deque< string >() {
+            if( &other != this ) {
+                *this = strings( other );
+            }
+            return *this;
+        }
+
+        template< typename T > strings( const T &t0, const T &t1 ) : std::deque< string >()
         { this->resize(2); (*this)[0] = t0; (*this)[1] = t1; }
-        template< typename T > strings( const T &t0, const T &t1, const T &t2 )
+        template< typename T > strings( const T &t0, const T &t1, const T &t2 ) : std::deque< string >()
         { this->resize(3); (*this)[0] = t0; (*this)[1] = t1; (*this)[2] = t2; }
-        template< typename T > strings( const T &t0, const T &t1, const T &t2, const T &t3 )
+        template< typename T > strings( const T &t0, const T &t1, const T &t2, const T &t3 ) : std::deque< string >()
         { this->resize(4); (*this)[0] = t0; (*this)[1] = t1; (*this)[2] = t2; (*this)[3] = t3; }
-        template< typename T > strings( const T &t0, const T &t1, const T &t2, const T &t3, const T &t4 )
+        template< typename T > strings( const T &t0, const T &t1, const T &t2, const T &t3, const T &t4 ) : std::deque< string >()
         { this->resize(5); (*this)[0] = t0; (*this)[1] = t1; (*this)[2] = t2; (*this)[3] = t3; (*this)[4] = t4; }
-        template< typename T > strings( const T &t0, const T &t1, const T &t2, const T &t3, const T &t4, const T &t5 )
+        template< typename T > strings( const T &t0, const T &t1, const T &t2, const T &t3, const T &t4, const T &t5 ) : std::deque< string >()
         { this->resize(6); (*this)[0] = t0; (*this)[1] = t1; (*this)[2] = t2; (*this)[3] = t3; (*this)[4] = t4; (*this)[5] = t5; }
-        template< typename T > strings( const T &t0, const T &t1, const T &t2, const T &t3, const T &t4, const T &t5, const T &t6 )
+        template< typename T > strings( const T &t0, const T &t1, const T &t2, const T &t3, const T &t4, const T &t5, const T &t6 ) : std::deque< string >()
         { this->resize(7); (*this)[0] = t0; (*this)[1] = t1; (*this)[2] = t2; (*this)[3] = t3; (*this)[4] = t4; (*this)[5] = t5; (*this)[6] = t6; }
 
         const string &at( const int &pos ) const
@@ -748,20 +728,6 @@ namespace wire
                 return *( this->begin() + ( pos >= 0 ? pos % size : size - 1 + ((pos+1) % size) ) );
             static std::map< const strings *, string > map;
             return ( ( map[ this ] = map[ this ] ) = string() );
-        }
-
-        operator std::deque<std::string>() const //faster way to do this? reinterpret_cast?
-        {
-            std::deque<std::string> out( this->size() );
-            std::copy( this->begin(), this->end(), out.begin() );
-            return out;
-        }
-
-        operator std::vector<std::string>() const //faster way to do this? reinterpret_cast?
-        {
-            std::vector<std::string> out( this->size() );
-            std::copy( this->begin(), this->end(), out.begin() );
-            return out;
         }
 
         std::string str( const char *format1 = "\1\n", const std::string &pre = std::string(), const std::string &post = std::string() ) const
