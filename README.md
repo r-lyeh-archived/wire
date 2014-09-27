@@ -7,7 +7,7 @@ Wire
 - Wire features simple string interpolation and string casting macros.
 - Wire features a simple expression evaluator.
 - No dependencies.
-- MIT licensed.
+- BOOST licensed.
 
 ### wire::string()
 Extended ```std::string``` replacement.

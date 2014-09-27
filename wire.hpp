@@ -754,7 +754,7 @@ namespace wire
 
 std::ostream &operator <<( std::ostream &os, const wire::strings &s );
 
-// String interpolation and string casting macros. MIT licensed.
+// String interpolation and string casting macros. BOOST licensed.
 
 namespace wire
 {
@@ -859,7 +859,7 @@ namespace wire
 
 #define $wire(FMT,...) wire::parser(FMT,#__VA_ARGS__)(__VA_ARGS__)
 
-// simple getopt replacement class. mit licensed
+// simple getopt replacement class. BOOST licensed
 // - rlyeh
 
 // this geptop class is a std::map replacement where key/value are wire::string.
@@ -937,7 +937,7 @@ namespace wire {
     };
 }
 
-// simple INI reader and writer. mit licensed
+// simple INI reader and writer. BOOST licensed
 // - rlyeh
 
 namespace wire {
