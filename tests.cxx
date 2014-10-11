@@ -146,7 +146,6 @@ int main( int argc, const char **argv )
 {
     // tools
     test3( wire::format("%d %1.3f %s", 10, 3.14159f, "hello world"), ==, "10 3.142 hello world" );
-    test3( wire::eval("(2+3)*2"), ==, 10 );
 
     test3( wire::string(99.95f), ==, "99.95" );
     test3( wire::string(999.9999), ==, 999.9999 );
@@ -355,69 +354,6 @@ int main( int argc, const char **argv )
     test3( wire::string().at(-1), ==, '\0' );
     test3( wire::string().at( 0), ==, '\0' );
     test3( wire::string().at( 1), ==, '\0' );
-
-    // Some simple expressions
-    test3( wire::eval("1234"), ==, 1234 );
-    test3( wire::eval("1+2*3"), ==, 7 );
-
-    // Parenthesis
-    test3( wire::eval("5*(4+4+1)"), ==, 45 );
-    test3( wire::eval("5*(2*(1+3)+1)"), ==, 45 );
-    test3( wire::eval("5*((1+3)*2+1)"), ==, 45 );
-
-    // Spaces
-    test3( wire::eval("5 * ((1 + 3) * 2 + 1)"), ==, 45 );
-    test3( wire::eval("5 - 2 * ( 3 )"), ==, -1 );
-    test3( wire::eval("5 - 2 * ( ( 4 )  - 1 )"), ==, -1 );
-
-    // Sign before parenthesis
-    test3( wire::eval("-(2+1)*4"), ==, -12 );
-    test3( wire::eval("-4*(2+1)"), ==, -12 );
-
-    // Fractional numbers
-    test3( wire::eval("1.5/5"), ==, 0.3 );
-    test3( wire::eval("1/5e10"), ==, 2e-11 );
-    test3( wire::eval("(4-3)/(4*4)"), ==, 0.0625 );
-    test3( wire::eval("1/2/2"), ==, 0.25 );
-    test3( wire::eval("0.25 * .5 * 0.5"), ==, 0.0625 );
-    test3( wire::eval(".25 / 2 * .5"), ==, 0.0625 );
-
-    // Repeated operators
-    test3( wire::eval("1+-2"), ==, -1 );
-    test3( wire::eval("--2"), ==, 2 );
-    test3( wire::eval("2---2"), ==, 0 );
-    test3( wire::eval("2-+-2"), ==, 4 );
-
-    // Check for parenthesis error
-    testN( wire::eval("5*((1+3)*2+1") );
-    testN( wire::eval("5*((1+3)*2)+1)") );
-
-    // Check for repeated operators
-    testN( wire::eval("5*/2") );
-
-    // Check for wrong positions of an operator
-    testN( wire::eval("*2") );
-    testN( wire::eval("2+") );
-    testN( wire::eval("2*") );
-
-    // Check for divisions by zero
-    testN( wire::eval("2/0") );
-    testN( wire::eval("3+1/(5-5)+4") );
-    testN( wire::eval("2/") ); // Erroneously detected as division by zero, but that's ok for us
-
-    // Check for invalid characters
-    testN( wire::eval("~5") );
-    testN( wire::eval("5x") );
-
-    // Check for multiply errors
-    testN( wire::eval("3+1/0+4$") ); // Only one error will be detected (in this case, the last one)
-    testN( wire::eval("3+1/0+4") );
-    testN( wire::eval("q+1/0)") ); // ...or the first one
-    testN( wire::eval("+1/0)") );
-    testN( wire::eval("+1/0") );
-
-    // Check for emtpy string
-    testN( wire::eval("") );
 
     // Other tests
     tests_from_string_sample();

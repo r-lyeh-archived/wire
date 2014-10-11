@@ -5,9 +5,8 @@ Wire
 - Wire features all std::string basics plus new extended functionality.
 - Wire features both C and C++ style safe formatters.
 - Wire features simple string interpolation and string casting macros.
-- Wire features a simple expression evaluator.
-- No dependencies.
-- BOOST licensed.
+- Wire is header-only. No dependencies.
+- Wire is BOOST licensed. Binaries do not require license attribution.
 
 ### wire::string()
 Extended ```std::string``` replacement.
@@ -139,19 +138,6 @@ Safe C format
 ```c++
 std::string fmt = wire::format("hello %s %3d\n", "world", 123);
 // fmt == "hello world 123\n"
-```
-
-### wire::eval()
-
-Simple expression evaluator
-
-```c++
-double a = wire::eval("(12*12)+6");
-// a == 150.0
-double b = wire::eval("1/0");
-double c = wire::eval("1+x");
-double d = wire::eval("1+2)");
-// b == NaN && c == NaN && d == NaN
 ```
 
 ### $wire()

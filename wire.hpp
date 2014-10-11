@@ -1,28 +1,12 @@
 /*
  * Extended C++ standard string classes, string interpolation and casting macros.
- * Copyright (c) 2010-2013, Mario 'rlyeh' Rodriguez
+ * Copyright (c) 2010-2014, Mario 'rlyeh' Rodriguez
+ *
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See license copy at http://www.boost.org/LICENSE_1_0.txt)
 
- * wire::eval() based on code by Peter Kankowski (see http://goo.gl/Kx6Oi)
  * wire::format() based on code by Adam Rosenfield (see http://goo.gl/XPnoe)
  * wire::format() based on code by Tom Distler (see http://goo.gl/KPT66)
-
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
 
  * @todo:
  * - string::replace_map(): specialize for target_t == char || replacement_t == char
@@ -37,18 +21,28 @@
 
 #pragma once
 
+#include <cctype>
 #include <cstdarg>
+#include <cstdio>
 #include <cstring>
 
 #include <algorithm>
-#include <cctype>
 #include <deque>
 #include <iomanip>
+#include <iostream>
 #include <limits>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#ifdef _MSC_VER
+#    define wire$vsnprintf _vsnprintf
+#    pragma warning( push )
+#    pragma warning( disable : 4996 )
+#else
+#    define wire$vsnprintf  vsnprintf
+#endif
 
 namespace wire
 {
@@ -56,7 +50,37 @@ namespace wire
     // Function tools
 
     // Function to do safe C-style formatting
-    std::string format( const char *fmt, ... );
+    static inline std::string format( const char *fmt, ... ) {
+        int len;
+        std::string self;
+        using namespace std;
+
+        // Calculate the final length of the formatted string
+        {
+            va_list args;
+            va_start( args, fmt );
+            len = wire$vsnprintf( 0, 0, fmt, args );
+            va_end( args );
+        }
+
+        // Allocate a buffer (including room for null termination)
+        char* target_string = new char[++len];
+
+        // Generate the formatted string
+        {
+            va_list args;
+            va_start( args, fmt );
+            wire$vsnprintf( target_string, len, fmt, args );
+            va_end( args );
+        }
+
+        // Assign the formatted string
+        self.assign( target_string );
+
+        // Clean up
+        delete [] target_string;
+        return self;
+    }
 
     // Function to convert strings <-> numbers in most precise way (C99)
     static inline std::string precise( const long double &t ) {
@@ -750,21 +774,17 @@ namespace wire
     };
 }
 
-#include <iostream>
-
-std::ostream &operator <<( std::ostream &os, const wire::strings &s );
-
 // String interpolation and string casting macros. BOOST licensed.
 
 namespace wire
 {
     // public api, define/update
 
-#   define $(a)         wire::locate( "$" #a )
+#   define $(a)         wire::dollar_impl::locate( "$" #a )
 
     // public api, translate
 
-#   define $$(a)        wire::translate( a )
+#   define $$(a)        wire::dollar_impl::translate( a )
 
     // public api, cast and sugars
 
@@ -781,9 +801,83 @@ namespace wire
 
     // private details
 
-    std::vector< std::string > extract( const wire::string &dollartext, char sep0 = '$', char sep1 = '\0' );
-    wire::string translate( const wire::string &dollartext, const wire::string &recursive_parent = std::string() );
-    wire::string &locate( const wire::string &text );
+    struct dollar_impl {
+
+        static std::map< std::string, wire::string > &get_map() {
+            static std::map< std::string, wire::string > map;
+            return map;
+        }
+
+        static wire::string &locate( const wire::string &text ) {
+            static std::map< std::string, wire::string > &map = get_map();
+            return ( map[ text ] = map[ text ] );
+        }
+
+        static wire::string translate( const wire::string &dollartext, const wire::string &parent = std::string() ) {
+            static std::map< std::string, wire::string > &map = get_map();
+            wire::string out, id;
+
+            for( wire::string::const_iterator in = dollartext.begin(), end = dollartext.end(); in != end; ++in ) {
+                const char &it = *in;
+
+                if( id.size() ) {
+                    /**/ if( unsigned( it - 'a' ) <= 'z' - 'a' ) id += it;
+                    else if( unsigned( it - 'A' ) <= 'Z' - 'A' ) id += it;
+                    else if( unsigned( it - '0' ) <= '9' - '0' ) id += it;
+                    else if( it == '-' || it == '_' )            id += it;
+                    else {
+                        if( map.find(id) != map.end() && id != parent )
+                            out << translate(map.find(id)->second, id) << it;
+                        else
+                            out << id << it;
+
+                        id = std::string();
+                    }
+                }
+                else {
+                    if( it == '$' )
+                        id += it;
+                    else
+                        out << it;
+                }
+            }
+
+            if( id.size() ) {
+                if( map.find(id) != map.end() && id != parent )
+                    out << translate(map.find(id)->second, id);
+                else
+                    out << id;
+            }
+
+            return out;
+        }
+
+        static std::vector< std::string > extract( const wire::string &dollartext, char sep0 = '$', char sep1 = '\0' ) {
+            std::string id;
+            std::vector< std::string > out;
+
+            for( wire::string::const_iterator in = dollartext.begin(), end = dollartext.end(); in != end; ++in ) {
+                const char &it = *in;
+
+                if( id.size() ) {
+                    /**/ if( unsigned( it - 'a' ) <= 'z' - 'a' ) id += it;
+                    else if( unsigned( it - 'A' ) <= 'Z' - 'A' ) id += it;
+                    else if( unsigned( it - '0' ) <= '9' - '0' ) id += it;
+                    else if( it == '-' || it == '_' )            id += it;
+                    else {
+                        out.push_back( id );
+                        id = std::string();
+                    }
+                }
+                else if( it == sep0 || it == sep1 ) id += it;
+            }
+
+            if( id.size() )
+                out.push_back( id );
+
+            return out;
+        }
+    };
 }
 
 //
@@ -904,7 +998,7 @@ namespace wire {
 
         size_t size() const {
             unsigned i;
-            for( i = 0; has(i); ++i ) 
+            for( i = 0; has(i); ++i )
             {}
             return i;
         }
@@ -975,3 +1069,8 @@ namespace wire {
         }
     };
 }
+
+#ifdef _MSC_VER
+#    pragma warning( pop )
+#endif
+#undef wire$vsnprintf
