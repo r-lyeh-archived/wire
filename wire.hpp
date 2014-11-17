@@ -716,7 +716,7 @@ namespace wire
         {}
 
         template <typename CONTAINER>
-        strings &operator =( const CONTAINER &other ) : std::deque< string >() {
+        strings &operator =( const CONTAINER &other ) {
             if( &other != this ) {
                 *this = strings( other );
             }
@@ -752,6 +752,13 @@ namespace wire
                 return *( this->begin() + ( pos >= 0 ? pos % size : size - 1 + ((pos+1) % size) ) );
             static std::map< const strings *, string > map;
             return ( ( map[ this ] = map[ this ] ) = string() );
+        }
+
+        const string &operator[]( const int &pos ) const {
+            return at(pos);
+        }
+        string &operator[]( const int &pos ) {
+            return at(pos);
         }
 
         std::string str( const char *format1 = "\1\n", const std::string &pre = std::string(), const std::string &post = std::string() ) const
