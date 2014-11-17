@@ -99,9 +99,6 @@ namespace wire
         return ld;
     }
 
-    // Function to evaluate simple numeric expressions
-    double eval( const std::string &expression );
-
     /* Public API */
     // Main class
 
