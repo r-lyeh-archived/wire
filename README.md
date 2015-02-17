@@ -1,4 +1,4 @@
-Wire
+Wire <a href="https://travis-ci.org/r-lyeh/wire"><img src="https://api.travis-ci.org/r-lyeh/wire.svg?branch=master" align="right" /></a>
 ====
 
 - Wire is an extended C++ std::string drop-in replacement.
