@@ -1,7 +1,7 @@
 Wire <a href="https://travis-ci.org/r-lyeh/wire"><img src="https://api.travis-ci.org/r-lyeh/wire.svg?branch=master" align="right" /></a>
 ====
 
-- Wire is an extended C++ std::string drop-in replacement.
+- Wire is an extended C++ std::string drop-in replacement (C++11).
 - Wire features all std::string basics plus new extended functionality.
 - Wire features both C and C++ style safe formatters.
 - Wire features simple string interpolation and string casting macros.
