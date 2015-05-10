@@ -1,9 +1,6 @@
 /*
  * Extended C++ standard string classes, string interpolation and casting macros.
- * Copyright (c) 2010-2014, Mario 'rlyeh' Rodriguez
- *
- * Distributed under the Boost Software License, Version 1.0.
- * (See license copy at http://www.boost.org/LICENSE_1_0.txt)
+ * Copyright (c) 2010-2014, Mario 'rlyeh' Rodriguez, zlib/libpng licensed.
 
  * wire::format() based on code by Adam Rosenfield (see http://goo.gl/XPnoe)
  * wire::format() based on code by Tom Distler (see http://goo.gl/KPT66)
@@ -156,14 +153,14 @@ namespace wire
             return *this;
         }
 
-        string( string &&x ) : std::string{std::forward<std::string>(x)} 
+        string( string &&x ) : std::string{std::forward<std::string>(x)}
         {}
         string &operator=( string &&other ){
             if( this != &other ) {
             }
             return *this;
-        } 
-*/        
+        }
+*/
 
         /*
         string( string &&other ) : std::string()
@@ -804,7 +801,7 @@ namespace wire
     };
 }
 
-// String interpolation and string casting macros. BOOST licensed.
+// String interpolation and string casting macros. zlib/libpng licensed.
 
 namespace wire
 {
@@ -983,7 +980,7 @@ namespace wire
 
 #define $wire(FMT,...) wire::parser(FMT,#__VA_ARGS__)(__VA_ARGS__)
 
-// simple getopt replacement class. BOOST licensed
+// simple getopt replacement class. zlib/libpng licensed
 // - rlyeh
 
 // this geptop class is a std::map replacement where key/value are wire::string.
@@ -1061,7 +1058,7 @@ namespace wire {
     };
 }
 
-// simple INI reader and writer. BOOST licensed
+// simple INI reader and writer. zlib/libpng licensed
 // - rlyeh
 
 namespace wire {

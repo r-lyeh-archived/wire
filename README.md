@@ -6,7 +6,7 @@ Wire <a href="https://travis-ci.org/r-lyeh/wire"><img src="https://api.travis-ci
 - Wire features both C and C++ style safe formatters.
 - Wire features simple string interpolation and string casting macros.
 - Wire is header-only. No dependencies.
-- Wire is BOOST licensed. Binaries do not require license attribution.
+- Wire is zlib/libpng licensed. Binaries do not require license attribution.
 
 ### wire::string()
 Extended ```std::string``` replacement.
