@@ -202,3 +202,8 @@ See also macro sugars:
 
 Check [sample.dollar.cc](sample.dollar.cc) for a detailed sample usage.
 
+### Changelog
+- v1.0.0 (2015/06/12)
+  - Removed a few warnings
+- v0.0.0 (2010/xx/xx)
+  - Initial commit
