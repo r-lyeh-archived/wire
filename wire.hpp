@@ -1077,10 +1077,14 @@ namespace wire {
             for( auto &line : wire::string(text).tokenize("\r\n") ) {
                 // remove comments, split line into tokens and parse tokens
                 line = line.substr( 0, line.find_first_of(';') );
-                wire::strings t = line.split("[]=");
-                /**/ if( t.size() == 3 && t[0] == "[" && t[2] == "]" ) section = t[1];
-                else if( t.size() == 3 && t[1] == "=" ) (*this)[section + "." + t[0]] = t[2];
-                else return false;
+                // trim tabs and spaces
+                line = line.trim("\t ");
+                if( !line.empty() ) {
+                    wire::strings t = line.split("[]=");
+                    /**/ if( t.size() == 3 && t[0] == "[" && t[2] == "]" ) section = t[1];
+                    else if( t.size() == 3 && t[1] == "=" ) (*this)[section + "." + t[0]] = t[2];
+                    else return false;
+                }
             }
             return true;
         }
