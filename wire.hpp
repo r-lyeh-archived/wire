@@ -1073,16 +1073,24 @@ namespace wire {
 
         bool load( const std::string &text ) {
             *this = ini();
+            unsigned numline = 0;
             wire::string section;
-            for( auto &line : wire::string(text).tokenize("\r\n") ) {
+            for( auto &line : wire::string(text).split("\n") ) {
+                if( line == "\n" ) continue;
+                numline++;
+                // std::cout << "L" << numline << " " << line << std::endl;
                 // remove comments, split line into tokens and parse tokens
                 line = line.substr( 0, line.find_first_of(';') );
                 // trim tabs and spaces
-                line = line.trim("\t ");
+                line = line.trim("\r\n\t ");
                 if( !line.empty() ) {
                     wire::strings t = line.split("[]=");
-                    /**/ if( t.size() == 3 && t[0] == "[" && t[2] == "]" ) section = t[1];
-                    else if( t.size() == 3 && t[1] == "=" ) (*this)[section + "." + t[0]] = t[2];
+                    /**/ if( t.size() == 3 && t[1] == "=" ) {
+                        wire::string symbol = section + "." + t[0];
+                        (*this)[symbol] = t[2];
+                        lines[symbol] = numline;
+                    }
+                    else if( t.size() == 3 && t[0] == "[" && t[2] == "]" ) section = t[1];
                     else return false;
                 }
             }
@@ -1100,6 +1108,13 @@ namespace wire {
             }
             return output;
         }
+
+        unsigned at( const std::string &symbol ) const {
+            std::map<std::string,unsigned>::const_iterator find = lines.find(symbol);
+            return find == lines.end() ? 0 : find->second;
+        }
+
+        std::map< std::string, unsigned > lines;
     };
 }
 
