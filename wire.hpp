@@ -32,7 +32,8 @@
 #include <string>
 #include <vector>
 
-#define WIRE_VERSION "1.0.0" /* (2015/06/12) - Removed a few warnings
+#define WIRE_VERSION "2.0.0" /* (2015/08/09) - Moved string interpolator to a library apart; Improved INI reader;
+#define WIRE_VERSION "1.0.0" // (2015/06/12) - Removed a few warnings
 #define WIRE_VERSION "0.0.0" // (2010/xx/xx) - Initial commit */
 
 #ifdef _MSC_VER
@@ -803,113 +804,7 @@ namespace wire
     };
 }
 
-// String interpolation and string casting macros. zlib/libpng licensed.
-
-namespace wire
-{
-    // public api, define/update
-
-#   define $(a)         wire::dollar_impl::locate( "$" #a )
-
-    // public api, translate
-
-#   define $$(a)        wire::dollar_impl::translate( a )
-
-    // public api, cast and sugars
-
-#   define $cast(a,b)   $( a ).as<b>()
-
-#   define $string(a)   $( a )               // no need to cast
-#   define $bool(a)     $cast( a, bool     )
-#   define $char(a)     $cast( a, char     )
-#   define $int(a)      $cast( a, int      )
-#   define $float(a)    $cast( a, float    )
-#   define $double(a)   $cast( a, double   )
-#   define $size_t(a)   $cast( a, size_t   )
-#   define $unsigned(a) $cast( a, unsigned )
-
-    // private details
-
-    struct dollar_impl {
-
-        static std::map< std::string, wire::string > &get_map() {
-            static std::map< std::string, wire::string > map;
-            return map;
-        }
-
-        static wire::string &locate( const wire::string &text ) {
-            static std::map< std::string, wire::string > &map = get_map();
-            return ( map[ text ] = map[ text ] );
-        }
-
-        static wire::string translate( const wire::string &dollartext, const wire::string &parent = std::string() ) {
-            static std::map< std::string, wire::string > &map = get_map();
-            wire::string out, id;
-
-            for( wire::string::const_iterator in = dollartext.begin(), end = dollartext.end(); in != end; ++in ) {
-                const char &it = *in;
-
-                if( id.size() ) {
-                    /**/ if( unsigned( it - 'a' ) <= 'z' - 'a' ) id += it;
-                    else if( unsigned( it - 'A' ) <= 'Z' - 'A' ) id += it;
-                    else if( unsigned( it - '0' ) <= '9' - '0' ) id += it;
-                    else if( it == '-' || it == '_' )            id += it;
-                    else {
-                        if( map.find(id) != map.end() && id != parent )
-                            out << translate(map.find(id)->second, id) << it;
-                        else
-                            out << id << it;
-
-                        id = std::string();
-                    }
-                }
-                else {
-                    if( it == '$' )
-                        id += it;
-                    else
-                        out << it;
-                }
-            }
-
-            if( id.size() ) {
-                if( map.find(id) != map.end() && id != parent )
-                    out << translate(map.find(id)->second, id);
-                else
-                    out << id;
-            }
-
-            return out;
-        }
-
-        static std::vector< std::string > extract( const wire::string &dollartext, char sep0 = '$', char sep1 = '\0' ) {
-            std::string id;
-            std::vector< std::string > out;
-
-            for( wire::string::const_iterator in = dollartext.begin(), end = dollartext.end(); in != end; ++in ) {
-                const char &it = *in;
-
-                if( id.size() ) {
-                    /**/ if( unsigned( it - 'a' ) <= 'z' - 'a' ) id += it;
-                    else if( unsigned( it - 'A' ) <= 'Z' - 'A' ) id += it;
-                    else if( unsigned( it - '0' ) <= '9' - '0' ) id += it;
-                    else if( it == '-' || it == '_' )            id += it;
-                    else {
-                        out.push_back( id );
-                        id = std::string();
-                    }
-                }
-                else if( it == sep0 || it == sep1 ) id += it;
-            }
-
-            if( id.size() )
-                out.push_back( id );
-
-            return out;
-        }
-    };
-}
-
-//
+// Generic print containers
 
 namespace wire
 {
@@ -1072,37 +967,40 @@ namespace wire {
         {}
 
         bool load( const std::string &text ) {
+            size_t at;
+            wire::string symbol, tag;
+            wire::strings lines = wire::string(text).split("\n");
             *this = ini();
-            unsigned numline = 0;
-            wire::string section;
-            for( auto &line : wire::string(text).split("\n") ) {
-                if( line == "\n" ) continue;
-                numline++;
-                // std::cout << "L" << numline << " " << line << std::endl;
-                // remove comments, split line into tokens and parse tokens
-                line = line.substr( 0, line.find_first_of(';') );
-                // trim tabs and spaces
-                line = line.trim("\r\n\t ");
-                if( !line.empty() ) {
-                    wire::strings t = line.split("[]=");
-                    /**/ if( t.size() == 3 && t[1] == "=" ) {
-                        wire::string symbol = section + "." + t[0];
-                        (*this)[symbol] = t[2];
-                        lines[symbol] = numline;
+            for( auto end = lines.size(), L = end - end; L < end; ++L ) {
+                auto &line = lines[ L ];
+                if( line != "\n" ) {
+                    // std::cout << "L" << L+1 << " " << line << std::endl;
+                    // remove comments
+                    line = line.substr( 0, line.find_first_of(';') );
+                    // trim blanks
+                    line = line.trim("\r\n\t ");
+                    // split line into tokens and parse tokens
+                    if( line.size() >= 3 ) {
+                        /**/ if( line[0] == '[' && line[ line.size() - 1 ] == ']' ) {
+                            tag = line.substr(1, line.size() - 2);
+                        }
+                        else if( (at = line.find_first_of('=')) != std::string::npos ) {
+                            lines[symbol = tag + "." + line.substr( 0, at )] = L + 1;
+                            (*this)[symbol] = line.substr( at + 1 );
+                        }
+                        else return false;
                     }
-                    else if( t.size() == 3 && t[0] == "[" && t[2] == "]" ) section = t[1];
-                    else return false;
                 }
             }
             return true;
         }
 
         std::string save() const {
-            std::string output( "; auto-generated by ini class\r\n" ), section;
+            std::string output( "; auto-generated by ini class\r\n" ), tag;
             for( auto &it : *this ) {
                 wire::strings kv = wire::string(it.first).tokenize(".");
-                if( section != kv[0] ) {
-                    output += "\r\n[" + ( section = kv[0] ) + "]\r\n";
+                if( tag != kv[0] ) {
+                    output += "\r\n[" + ( tag = kv[0] ) + "]\r\n";
                 }
                 output += kv[1] + "=" + it.second + "\r\n";
             }

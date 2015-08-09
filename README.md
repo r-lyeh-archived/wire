@@ -4,8 +4,7 @@ Wire <a href="https://travis-ci.org/r-lyeh/wire"><img src="https://api.travis-ci
 - Wire is an extended C++ std::string drop-in replacement (C++11).
 - Wire features all std::string basics plus new extended functionality.
 - Wire features both C and C++ style safe formatters.
-- Wire features simple string interpolation and string casting macros.
-- Wire is header-only. No dependencies.
+- Wire is cross-platform, header-only, no dependencies.
 - Wire is zlib/libpng licensed. Binaries do not require license attribution.
 
 ### wire::string()
@@ -172,37 +171,9 @@ Arguments parser
 
 @todocument
 
-### wire::dollars
-String interpolation macros
-
-- Use `$(symbol)` macro to create/update a symbol
-- Use `$$(string)` macro to translate all symbols in string.
-  - All defined $symbols are replaced.
-  - All undefined $symbols are quoted.
-
-```c++
-$(PLAYER_1) = "Mark";
-$(PLAYER_2) = "John";
-
-std::string txt = $$("Hello $PLAYER_1, $PLAYER_2 and $PLAYER3!");
-// txt == "Hello Mark, John and $PLAYER3!"
-```
-
-See also macro sugars:
-
-`$cast(a,b)`
-`$string(a)`
-`$bool(a)`
-`$char(a)`
-`$int(a)`
-`$float(a)`
-`$double(a)`
-`$size_t(a)`
-`$unsigned(a)`
-
-Check [sample.dollar.cc](sample.dollar.cc) for a detailed sample usage.
-
 ### Changelog
+- v2.0.0 (2015/08/09)
+  - Moved string interpolator to a library apart.
 - v1.0.0 (2015/06/12)
   - Removed a few warnings
 - v0.0.0 (2010/xx/xx)
