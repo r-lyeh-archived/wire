@@ -161,17 +161,14 @@ std::string wire::str2( const T&, fmt1, pre = string(), post = string() )
 std::string wire::str12( const T&, fmt12, pre = string(), post = string() )
 ```
 
-### wire::ini()
-INI reader
-
-@todocument
-
 ### wire::getopt()
 Arguments parser
 
 @todocument
 
 ### Changelog
+- v2.1.0 (2015/09/19)
+  - Moved .ini reader/writer to a library apart.
 - v2.0.0 (2015/08/09)
   - Moved string interpolator to a library apart.
 - v1.0.0 (2015/06/12)
