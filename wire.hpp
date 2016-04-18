@@ -32,7 +32,8 @@
 #include <string>
 #include <vector>
 
-#define WIRE_VERSION "2.1.0" /* (2015/09/19) - Moved .ini reader/writer to a library apart.
+#define WIRE_VERSION "2.2.0" /* (2016/04/18) - Moved getopt to a library apart.
+#define WIRE_VERSION "2.1.0" // (2015/09/19) - Moved .ini reader/writer to a library apart.
 #define WIRE_VERSION "2.0.0" // (2015/08/09) - Moved string interpolator to a library apart; Improved INI reader;
 #define WIRE_VERSION "1.0.0" // (2015/06/12) - Removed a few warnings
 #define WIRE_VERSION "0.0.0" // (2010/xx/xx) - Initial commit */
@@ -877,84 +878,6 @@ namespace wire
 }
 
 #define $wire(FMT,...) wire::parser(FMT,#__VA_ARGS__)(__VA_ARGS__)
-
-// simple getopt replacement class. zlib/libpng licensed
-// - rlyeh
-
-// this geptop class is a std::map replacement where key/value are wire::string.
-// given invokation './app.out --user=me --pass=123 -h' this class delivers:
-// map[0] = "./app.out", map[1] = "--user=me", map[2]="--pass=123", map[3]='-h'
-// but also, map["--user"]="me", map["--pass"]="123" and also, map["-h"]=true
-
-// .cmdline() for a print app invokation string
-// .str() for pretty map printing
-// .size() number of arguments (equivalent to argc), rather than std::map.size()
-
-namespace wire {
-
-    struct getopt : public std::map< std::string, wire::string >
-    {
-        getopt() : std::map< std::string, wire::string >()
-        {}
-
-        explicit
-        getopt( int argc, const char **argv ) : std::map< std::string, wire::string >() {
-            wire::strings args( argc, argv );
-
-            // create key=value and key= args as well
-            for( auto &it : args ) {
-                wire::strings tokens = it.split( "=" );
-
-                if( tokens.size() == 3 && tokens[1] == "=" )
-                    (*this)[ tokens[0] ] = tokens[2];
-                else
-                if( tokens.size() == 2 && tokens[1] == "=" )
-                    (*this)[ tokens[0] ] = true;
-                else
-                if( tokens.size() == 1 && tokens[0] != argv[0] )
-                    (*this)[ tokens[0] ] = true;
-            }
-
-            // create args
-            while( argc-- ) {
-                (*this)[ std::to_string(argc) ] = std::string( argv[argc] );
-            }
-        }
-
-        size_t size() const {
-            unsigned i;
-            for( i = 0; has(i); ++i )
-            {}
-            return i;
-        }
-
-        bool has( const wire::string &op ) const {
-            return this->find(op) != this->end();
-        }
-
-        std::string str() const {
-            wire::string ss;
-            for( auto &it : *this )
-                ss << it.first << "=" << it.second << ',';
-            return ss.str();
-        }
-
-        std::string cmdline() const {
-            wire::string cmd;
-
-            // concatenate args
-            for( auto end = size(), arg = end - end; arg < end; ++arg ) {
-                cmd << this->find(std::to_string(arg))->second << ' ';
-            }
-
-            // remove trailing space, if needed
-            if( cmd.size() )
-                cmd.pop_back();
-
-            return cmd;
-        }
-    };
-}
 
 #ifdef _MSC_VER
 #    pragma warning( pop )

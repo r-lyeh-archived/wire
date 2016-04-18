@@ -1,4 +1,4 @@
-Wire <a href="https://travis-ci.org/r-lyeh/wire"><img src="https://api.travis-ci.org/r-lyeh/wire.svg?branch=master" align="right" /></a>
+Wire <a href="https://travis-ci.org/r-lyeh/wire"><img src="https://api.travis-ci.org/r-lyeh/wire.svg?branch=master" align="right" /></a><a href="LICENSE"><img src="https://img.shields.io/badge/license-zlib/libpng-blue.svg" align="right" /></a>
 ====
 
 - Wire is an extended C++ std::string drop-in replacement (C++11).
@@ -161,17 +161,11 @@ std::string wire::str2( const T&, fmt1, pre = string(), post = string() )
 std::string wire::str12( const T&, fmt12, pre = string(), post = string() )
 ```
 
-### wire::getopt()
-Arguments parser
-
 @todocument
 
 ### Changelog
-- v2.1.0 (2015/09/19)
-  - Moved .ini reader/writer to a library apart.
-- v2.0.0 (2015/08/09)
-  - Moved string interpolator to a library apart.
-- v1.0.0 (2015/06/12)
-  - Removed a few warnings
-- v0.0.0 (2010/xx/xx)
-  - Initial commit
+- v2.2.0 (2016/04/18): Moved getopt to a library apart.
+- v2.1.0 (2015/09/19): Moved .ini reader/writer to a library apart.
+- v2.0.0 (2015/08/09): Moved string interpolator to a library apart.
+- v1.0.0 (2015/06/12): Removed a few warnings
+- v0.0.0 (2010/xx/xx): Initial commit
